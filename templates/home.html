@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<head>
+<!-- Latest compiled and minified CSS -->
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" href="{{ url_for('static',filename = 'styles.css')}}">
+
+	<title> Home </title>
+</head>
+
+<html>
+	<body>
+		<div align="center">
+			{% if name != None %}
+			<h1 id = "test"> Welcome {{name}} </h1>
+			{% else %}
+			<h1 id = "test"> This is a header </h1>
+			{% endif %}
+		</div>
+		<div>
+		<table class="table">
+			<thead class="thead-dark">
+			<tr>
+			  <th scope="col">Day</th>
+			  <th scope="col">Name</th>
+			  <th scope="col">Song</th>
+			</tr>
+			</thead>
+			<tbody>
+				{% for val in vals %}
+				<tr><th scope="row">{{val['day']}}</th><td>{{val['name']}}</td><td>{{val['song']}}</td></tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		</div>
+
+	<h3 style='color: #ccc;font-size: 30px;'>Add Song</h3>
+    <div class="message_holder"></div>
+
+    <form action="" method="POST">
+      <input type="text" class="username" placeholder="Day"/>
+      <input type="text" class="message" placeholder="Song"/>
+      <input type="submit"/>
+    </form>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    
+    <script type="text/javascript">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on( 'connect', function() {
+        socket.emit( 'my event', {
+          data: 'User Connected'
+        } )
+        var form = $( 'form' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let user_name = $( 'input.username' ).val()
+          let user_input = $( 'input.message' ).val()
+          socket.emit( 'my event', {
+            day : user_name,
+            song : user_input,
+            name : '{{name}}'
+          } )
+          $( 'input.message' ).val( '' ).focus()
+        } )
+      } )
+      socket.on( 'update table', function( msg ) {
+      	console.log( msg )
+      	if( typeof msg.day !== 'undefined' ) {
+      		$( 'table.table' ).append( '<tr><th scope="row">'+msg.day+'</th><td>'+msg.name+'</td><td>'+msg.song+'</td></tr>')
+      	}
+      })
+    </script>
+	</body>
+</html>
